@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>名刺SVG作成ツール</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      min-height: 100vh;
+      background-color: #f3f4f6;
+      padding: 32px 16px;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 32px;
+      color: #1f2937;
+    }
+    
+    .form-section {
+      background-color: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .form-section h2 {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #374151;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #4b5563;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #34C5FF;
+      box-shadow: 0 0 0 3px rgba(52, 197, 255, 0.2);
+    }
+
+    .email-input-group {
+      display: flex;
+      align-items: center;
+    }
+
+    .email-input-group input {
+      border-radius: 8px 0 0 8px;
+    }
+
+    .email-suffix {
+      background-color: #e5e7eb;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-left: none;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
+      color: #374151;
+    }
+    
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 24px;
+    }
+    
+    .preview-card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .preview-header h2 {
+      font-size: 18px;
+      font-weight: bold;
+      color: #374151;
+    }
+    
+    .download-btn {
+      background-color: #34C5FF;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: background-color 0.2s;
+    }
+    
+    .download-btn:hover {
+      background-color: #1fb8f3;
+    }
+    
+    .svg-container {
+      overflow-x: auto;
+    }
+    
+    .svg-container svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    .notice {
+      margin-top: 24px;
+      padding: 16px;
+      background-color: #fef3c7;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #92400e;
+    }
+    
+    .notice strong {
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .preview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>名刺SVG作成ツール</h1>
+
+    <!-- 入力フォーム -->
+    <div class="form-section">
+      <h2>入力項目</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="titleJa">役職（日本語）</label>
+          <input type="text" id="titleJa" placeholder="例: 代表取締役" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label for="titleEn">役職（英語）</label>
+          <input type="text" id="titleEn" placeholder="例: CEO" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label for="lastNameJa">姓（日本語）</label>
+          <input type="text" id="lastNameJa" placeholder="例: 山田" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label for="firstNameJa">名（日本語）</label>
+          <input type="text" id="firstNameJa" placeholder="例: 太郎" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label for="lastNameRomaji">姓（ローマ字）</label>
+          <input type="text" id="lastNameRomaji" placeholder="例: Yamada" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label for="firstNameRomaji">名（ローマ字）</label>
+          <input type="text" id="firstNameRomaji" placeholder="例: Taro" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label for="email">メールアドレス</label>
+          <div class="email-input-group">
+            <input type="text" id="email" placeholder="例: t.yamada" oninput="updatePreview()">
+            <span class="email-suffix">@zrek.com</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="tel">電話番号（任意）</label>
+          <input type="text" id="tel" placeholder="例: 03-1234-5678" oninput="updatePreview()">
+        </div>
+      </div>
+    </div>
+
+    <!-- プレビュー -->
+    <div class="preview-grid">
+      <!-- 表面 -->
+      <div class="preview-card">
+        <div class="preview-header">
+          <h2>表面（日本語）</h2>
+          <div>
+            <button class="download-btn" onclick="downloadSVG('frontSvg', 'business_card_front.svg')">SVGダウンロード</button>
+          </div>
+        </div>
+        <div class="svg-container">
+          <svg id="frontSvg" width="1337" height="812" viewBox="0 0 1337 812" xmlns="http://www.w3.org/2000/svg">
+            <!-- 背景 -->
+            <rect width="1337" height="812" fill="#34C5FF" />
+            
+            <!-- ロゴ -->
+            <g transform="translate(777, 103)">
+              <rect y="36.0498" width="10.3" height="30.8999" fill="white"/>
+              <rect y="66.9502" width="10.3029" height="50.9823" transform="rotate(-45 0 66.9502)" fill="white"/>
+              <rect x="36.0498" y="103" width="10.3" height="30.8999" transform="rotate(-90 36.0498 103)" fill="white"/>
+              <rect x="103" y="66.9502" width="10.3" height="30.8999" transform="rotate(180 103 66.9502)" fill="white"/>
+              <rect x="103" y="36.0498" width="10.3029" height="50.9823" transform="rotate(135 103 36.0498)" fill="white"/>
+              <rect x="36.0498" width="10.3029" height="50.9823" transform="rotate(45 36.0498 0)" fill="white"/>
+              <rect x="95.7158" y="59.666" width="10.3012" height="50.9823" transform="rotate(45 95.7158 59.666)" fill="white"/>
+              <rect width="10.3" height="30.8999" transform="matrix(1.04907e-06 1 -1 1.63918e-08 66.9502 0)" fill="white"/>
+              <path d="M51.5 80.9258L29.6504 59.0762L29.6504 44.5098L51.5 66.3594L51.5 80.9258Z" fill="white"/>
+              <path d="M73.3496 59.0762L51.5 37.2266L51.5 22.6602L73.3496 44.5098L73.3496 59.0762Z" fill="white"/>
+              <path d="M58.7832 66.3593L44.2168 51.793L44.2168 37.2266L58.7832 51.793L58.7832 66.3593Z" fill="white"/>
+              <path d="M36.9346 37.2266V44.5097V51.7929L29.6514 44.5097L36.9346 37.2266Z" fill="white"/>
+              <path d="M66.0664 66.3594L66.0664 59.0762L66.0664 51.793L73.3496 59.0762L66.0664 66.3594Z" fill="white"/>
+              <path d="M132.586 90.1608V82.1184L176.231 21.1536H132.586V12.5488H188.548V20.5912L144.903 81.556H189.392V90.1608H132.586Z" fill="white"/>
+              <path d="M264.175 90.2733L244.377 59.3972H228.854V90.2733H219.18V12.5488H250.395C264.625 12.5488 274.749 21.6598 274.749 35.9449C274.749 50.23 265.187 57.5975 254.613 58.5536L275.592 90.2733H264.175ZM249.27 21.1536H228.854V50.8487H249.27C258.494 50.8487 264.793 44.6622 264.793 35.9449C264.793 27.2276 258.494 21.1536 249.27 21.1536Z" fill="white"/>
+              <path d="M440.993 90.1608L411.521 55.2354L403.703 64.0652V90.1608H394.029V12.5488H403.703V52.7046L438.068 12.5488H450.161L417.821 49.4426L452.973 90.1608H440.993Z" fill="white"/>
+              <path d="M313.994 12.5488L305.389 21.1536H355.614L364.22 12.5488H313.994Z" fill="white"/>
+              <path d="M314.837 46.1807L306.231 54.8418H354.939L363.544 46.1807H314.837Z" fill="white"/>
+              <path d="M313.881 81.6113L305.275 90.2161H355.614L364.219 81.6113H313.881Z" fill="white"/>
+            </g>
+            
+            <!-- 役職 -->
+            <text id="frontTitle" x="107" y="155" fill="#FFFFFF" font-size="40" font-family="'Noto Sans JP', sans-serif" font-weight="500" dominant-baseline="hanging" letter-spacing="0.05em">役職</text>
+            
+            <!-- 名前（日本語） -->
+            <text id="frontNameJa" x="107" y="233" fill="#FFFFFF" font-size="80" font-family="'Noto Sans JP', sans-serif" font-weight="500" dominant-baseline="hanging" letter-spacing="0.2em">姓　名</text>
+            
+            <!-- 名前（ローマ字）- 姓名順 -->
+            <text id="frontNameRomaji" x="107" y="359" fill="#FFFFFF" font-size="40" font-family="'Noto Sans JP', sans-serif" font-weight="500" dominant-baseline="hanging" letter-spacing="0.05em">Romaji Name</text>
+            
+            <!-- 縦線 -->
+            <rect id="frontLine" x="107" y="480" width="10" height="231" fill="#FFFFFF" />
+            
+            <!-- テキストボックス内容 -->
+            <text x="150" y="519" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">株式会社Zrek / ゼレック</text>
+            <text x="150" y="561" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">本社: 〒150−0041 東京都渋谷区神南1-6-12 B1F</text>
+            <text x="150" y="603" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">研究所: 〒212-0032 神奈川県川崎市幸区新川崎7-7 KBIC本館 117</text>
+            <text id="frontEmail" x="150" y="645" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">Mail: example@zrek.com</text>
+            <text id="frontTel" x="150" y="687" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em" style="display: none;"></text>
+            <text id="frontUrl" x="150" y="687" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">URL: https://www.zrek.org</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 裏面 -->
+      <div class="preview-card">
+        <div class="preview-header">
+          <h2>裏面（英語）</h2>
+          <button class="download-btn" onclick="downloadSVG('backSvg', 'business_card_back.svg')">SVGダウンロード</button>
+        </div>
+        <div class="svg-container">
+          <svg id="backSvg" width="1337" height="812" viewBox="0 0 1337 812" xmlns="http://www.w3.org/2000/svg">
+            <!-- 背景 -->
+            <rect width="1337" height="812" fill="#34C5FF" />
+            
+            <!-- ロゴ -->
+            <g transform="translate(777, 103)">
+              <rect y="36.0498" width="10.3" height="30.8999" fill="white"/>
+              <rect y="66.9502" width="10.3029" height="50.9823" transform="rotate(-45 0 66.9502)" fill="white"/>
+              <rect x="36.0498" y="103" width="10.3" height="30.8999" transform="rotate(-90 36.0498 103)" fill="white"/>
+              <rect x="103" y="66.9502" width="10.3" height="30.8999" transform="rotate(180 103 66.9502)" fill="white"/>
+              <rect x="103" y="36.0498" width="10.3029" height="50.9823" transform="rotate(135 103 36.0498)" fill="white"/>
+              <rect x="36.0498" width="10.3029" height="50.9823" transform="rotate(45 36.0498 0)" fill="white"/>
+              <rect x="95.7158" y="59.666" width="10.3012" height="50.9823" transform="rotate(45 95.7158 59.666)" fill="white"/>
+              <rect width="10.3" height="30.8999" transform="matrix(1.04907e-06 1 -1 1.63918e-08 66.9502 0)" fill="white"/>
+              <path d="M51.5 80.9258L29.6504 59.0762L29.6504 44.5098L51.5 66.3594L51.5 80.9258Z" fill="white"/>
+              <path d="M73.3496 59.0762L51.5 37.2266L51.5 22.6602L73.3496 44.5098L73.3496 59.0762Z" fill="white"/>
+              <path d="M58.7832 66.3593L44.2168 51.793L44.2168 37.2266L58.7832 51.793L58.7832 66.3593Z" fill="white"/>
+              <path d="M36.9346 37.2266V44.5097V51.7929L29.6514 44.5097L36.9346 37.2266Z" fill="white"/>
+              <path d="M66.0664 66.3594L66.0664 59.0762L66.0664 51.793L73.3496 59.0762L66.0664 66.3594Z" fill="white"/>
+              <path d="M132.586 90.1608V82.1184L176.231 21.1536H132.586V12.5488H188.548V20.5912L144.903 81.556H189.392V90.1608H132.586Z" fill="white"/>
+              <path d="M264.175 90.2733L244.377 59.3972H228.854V90.2733H219.18V12.5488H250.395C264.625 12.5488 274.749 21.6598 274.749 35.9449C274.749 50.23 265.187 57.5975 254.613 58.5536L275.592 90.2733H264.175ZM249.27 21.1536H228.854V50.8487H249.27C258.494 50.8487 264.793 44.6622 264.793 35.9449C264.793 27.2276 258.494 21.1536 249.27 21.1536Z" fill="white"/>
+              <path d="M440.993 90.1608L411.521 55.2354L403.703 64.0652V90.1608H394.029V12.5488H403.703V52.7046L438.068 12.5488H450.161L417.821 49.4426L452.973 90.1608H440.993Z" fill="white"/>
+              <path d="M313.994 12.5488L305.389 21.1536H355.614L364.22 12.5488H313.994Z" fill="white"/>
+              <path d="M314.837 46.1807L306.231 54.8418H354.939L363.544 46.1807H314.837Z" fill="white"/>
+              <path d="M313.881 81.6113L305.275 90.2161H355.614L364.219 81.6113H313.881Z" fill="white"/>
+            </g>
+            
+            <!-- 役職（英語） -->
+            <text id="backTitle" x="107" y="155" fill="#FFFFFF" font-size="40" font-family="'Noto Sans JP', sans-serif" font-weight="500" dominant-baseline="hanging" letter-spacing="0.05em">Title</text>
+            
+            <!-- 名前（英語）- 名姓順 -->
+            <text id="backNameEn" x="107" y="233" fill="#FFFFFF" font-size="80" font-family="'Noto Sans JP', sans-serif" font-weight="500" dominant-baseline="hanging" letter-spacing="0">English Name</text>
+            
+            <!-- 縦線 -->
+            <rect id="backLine" x="107" y="480" width="10" height="231" fill="#FFFFFF" />
+            
+            <!-- テキストボックス内容 -->
+            <text x="150" y="519" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">ZREK Inc.</text>
+            <text x="150" y="561" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">HQ: B1F, 1-6-12, Jinnan, Shibuya, Tokyo</text>
+            <text x="150" y="603" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">Labs: KBIC 117, 7-7, Shin-kawasaki, Saiwai, Kawasaki, Kanagawa</text>
+            <text id="backEmail" x="150" y="645" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">Mail: example@zrek.com</text>
+            <text id="backTel" x="150" y="687" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em" style="display: none;"></text>
+            <text id="backUrl" x="150" y="687" fill="#FFFFFF" font-size="32" font-family="'Noto Sans JP', sans-serif" font-weight="500" letter-spacing="0.05em">URL: https://www.zrek.org</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 両面ダウンロードボタン -->
+    <div style="text-align: center; margin-top: 24px;">
+      <button class="download-btn" style="padding: 12px 32px; font-size: 16px;" onclick="downloadBoth()">両面まとめてダウンロード</button>
+    </div>
+  </div>
+
+  <script>
+    function updatePreview() {
+      const titleJa = document.getElementById('titleJa').value || '役職';
+      const titleEn = document.getElementById('titleEn').value || 'Title';
+      const lastNameJa = document.getElementById('lastNameJa').value;
+      const firstNameJa = document.getElementById('firstNameJa').value;
+      const lastNameRomaji = document.getElementById('lastNameRomaji').value;
+      const firstNameRomaji = document.getElementById('firstNameRomaji').value;
+      const emailPrefix = document.getElementById('email').value || 'example';
+      const tel = document.getElementById('tel').value;
+
+      const email = emailPrefix + '@zrek.com';
+
+      // 日本語名（全角スペース区切り）
+      const japaneseName = (lastNameJa && firstNameJa) ? lastNameJa + '　' + firstNameJa : (lastNameJa + firstNameJa) || '姓　名';
+      // 表面: ローマ字は姓名順（半角スペース区切り）
+      const romajiName = [lastNameRomaji, firstNameRomaji].filter(Boolean).join(' ') || 'Romaji Name';
+      // 裏面: 英語名は名姓順（半角スペース区切り）
+      const englishName = [firstNameRomaji, lastNameRomaji].filter(Boolean).join(' ') || 'English Name';
+
+      // 表面更新
+      document.getElementById('frontTitle').textContent = titleJa;
+      document.getElementById('frontNameJa').textContent = japaneseName;
+      document.getElementById('frontNameRomaji').textContent = romajiName;
+      document.getElementById('frontEmail').textContent = 'Mail: ' + email;
+
+      // 裏面更新
+      document.getElementById('backTitle').textContent = titleEn;
+      document.getElementById('backNameEn').textContent = englishName;
+      document.getElementById('backEmail').textContent = 'Mail: ' + email;
+
+      // 電話番号の処理
+      const frontTel = document.getElementById('frontTel');
+      const frontUrl = document.getElementById('frontUrl');
+      const frontLine = document.getElementById('frontLine');
+      const backTel = document.getElementById('backTel');
+      const backUrl = document.getElementById('backUrl');
+      const backLine = document.getElementById('backLine');
+
+      if (tel) {
+        // 電話番号がある場合
+        frontTel.textContent = 'Tel: ' + tel;
+        frontTel.setAttribute('y', '687');
+        frontTel.style.display = 'block';
+        frontUrl.setAttribute('y', '729');
+        frontLine.setAttribute('height', '273'); // 231 + 42
+
+        backTel.textContent = 'Tel: ' + tel;
+        backTel.setAttribute('y', '687');
+        backTel.style.display = 'block';
+        backUrl.setAttribute('y', '729');
+        backLine.setAttribute('height', '273'); // 231 + 42
+      } else {
+        // 電話番号がない場合
+        frontTel.style.display = 'none';
+        frontUrl.setAttribute('y', '687');
+        frontLine.setAttribute('height', '231');
+
+        backTel.style.display = 'none';
+        backUrl.setAttribute('y', '687');
+        backLine.setAttribute('height', '231');
+      }
+    }
+
+    function downloadSVG(svgId, filename) {
+      const svgElement = document.getElementById(svgId);
+      
+      // SVGをクローンしてFigma用に変換
+      const clonedSvg = svgElement.cloneNode(true);
+      
+      // Figma用のY値変換マップ（要素ID: 差分）
+      // dominant-baselineを削除するとテキストが上に移動するので、Y値を増やす
+      const yAdjustments = {
+        'frontTitle': 40,
+        'frontNameJa': 80,
+        'frontNameRomaji': 40,
+        'backTitle': 40,
+        'backNameEn': 80
+      };
+      
+      // Y値を調整してdominant-baselineを削除
+      Object.keys(yAdjustments).forEach(id => {
+        const element = clonedSvg.getElementById(id);
+        if (element) {
+          const currentY = parseFloat(element.getAttribute('y'));
+          element.setAttribute('y', currentY + yAdjustments[id]);
+          element.removeAttribute('dominant-baseline');
+        }
+      });
+
+      // 全てのtext要素に対してFigma用の変換を適用
+      const textElements = clonedSvg.querySelectorAll('text');
+      textElements.forEach(el => {
+        // font-familyにMediumを含める
+        el.setAttribute('font-family', "'Noto Sans JP Medium', 'Noto Sans JP', sans-serif");
+        
+        // letter-spacingをemから%に変換（Figma用）
+        const letterSpacing = el.getAttribute('letter-spacing');
+        if (letterSpacing) {
+          const fontSize = parseFloat(el.getAttribute('font-size'));
+          if (letterSpacing === '0.05em') {
+            // 5% = fontSize * 0.05
+            el.setAttribute('letter-spacing', (fontSize * 0.05) + 'px');
+          } else if (letterSpacing === '0.2em') {
+            // 20% = fontSize * 0.2
+            el.setAttribute('letter-spacing', (fontSize * 0.2) + 'px');
+          }
+        }
+      });
+      
+      const svgData = new XMLSerializer().serializeToString(clonedSvg);
+      const blob = new Blob([svgData], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadBoth() {
+      downloadSVG('frontSvg', 'business_card_front.svg');
+      setTimeout(() => {
+        downloadSVG('backSvg', 'business_card_back.svg');
+      }, 500);
+    }
+
+    // 初期化
+    updatePreview();
+  </script>
+</body>
+</html>
